@@ -1,0 +1,20 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "bitnode"
+version = "0.0.1"
+description = ""
+authors = [
+    { name = "Pradyumna Krishna", email = "git@onpy.in" },
+]
+dependencies = [
+    "typer==0.7.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[project.scripts]
+bitnode = "bitnode.main:cli"
