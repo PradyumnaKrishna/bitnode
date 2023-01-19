@@ -1,10 +1,14 @@
+"""Template for Dockerfile and bitcoin.conf"""
+
 SAMPLE_DOCKERFILE = r"""FROM debian:11-slim
 
 RUN adduser --disabled-login --gecos "" ${user}
 RUN apt update && apt install wget -y
 
-
-RUN wget -q ${download_url} -O bitcoin.tar.gz \
+RUN set -ex \
+    && if [ "$$(uname -m)" = "x86_64" ]; then export TARGETPLATFORM=x86_64-linux-gnu; fi \
+    && if [ "$$(uname -m)" = "aarch64" ]; then export TARGETPLATFORM=aarch64-linux-gnu; fi \
+    wget -q ${download_url} -O bitcoin.tar.gz \
     && tar -xzf bitcoin.tar.gz \
     && cd $$(ls -d bitcoin*/|head -n 1) && cd bin \
     && install --mode 755 --target-directory /usr/local/bin *

@@ -1,47 +1,57 @@
-"""Bitnode CLI"""
-
-import os
 from enum import Enum
 from string import Template
+from typing import Optional
 
-import typer
+from fastapi import FastAPI, Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 
-from bitnode.templates.dockerfile import SAMPLE_DOCKERFILE, REGTEST_CONFIG
+from template import SAMPLE_DOCKERFILE, REGTEST_CONFIG
 
-cli = typer.Typer()
+app = FastAPI()
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
 
 
 class Modes(Enum):
-    """Modes to run bitcoind"""
+    """Bitcoin Operation Mode."""
 
+    MAINNET = "mainnet"
+    TESTNET = "testnet"
     REGTEST = "regtest"
 
 
-@cli.command()
-def generate(
-    url: str = typer.Argument(..., help="bitcoin-core download url"),
-    mode: Modes = typer.Argument(..., help="bitcoind run mode", case_sensitive=False),
-    user: str = typer.Option("bitcoin", help="docker user")
-):
-    """Generates Dockerfile and config for bitcoin-nodes."""
-    print("Generating Dockerfile and config...")
-
-    # generate dockerfile
-    dockerfile = Template(SAMPLE_DOCKERFILE).substitute(
-        download_url=url, user=user
+@app.get("/")
+def root(request: Request):
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request, "dockerfile": SAMPLE_DOCKERFILE},
     )
 
-    # generate config
-    conf = None
+
+@app.get("/generate")
+def generate(
+    request: Request,
+    core: str,
+    mode: Modes,
+    download_url: Optional[str] = None,
+    user: str = "bitcoin",
+):
+    """Generate Dockerfile."""
+
     if mode == Modes.REGTEST:
-        conf = REGTEST_CONFIG
+        config = REGTEST_CONFIG
+    else:
+        config = ""
 
-    # export files
-    os.makedirs("output", exist_ok=True)
-    with open("output/Dockerfile", "w", encoding="UTF-8") as file:
-        file.write(dockerfile)
-    if conf:
-        with open("output/bitcoin.conf", "w", encoding="UTF-8") as file:
-            file.write(conf)
+    if not download_url:
+        download_url = f"https://bitcoincore.org/bin/bitcoin-core-{core}/bitcoin-{core}-${{TARGETPLATFORM}}.tar.gz"
 
-    print("Dockerfile and config generated at output folder.")
+    dockerfile = Template(SAMPLE_DOCKERFILE).substitute(
+        user=user, download_url=download_url
+    )
+
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request, "dockerfile": dockerfile, "config": config},
+    )

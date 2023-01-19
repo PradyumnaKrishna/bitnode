@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Bitnode</title>
+    <style>
+      th, td {
+        padding: 15px;
+      }
+    </style>
+    <link rel="stylesheet" href={{ url_for('static', path='bootstrap.min.css') }}></link>
+  </head>
+  <body>
+    <!-- bar chart canvas element -->
+    <div class="container">
+      <div>
+          <h1>Bitnode Config Generator</h1>
+          <p>Choose your options</p>
+      </div>
+    </div>
+
+    <div>
+        <div class="container" style="width: 100%">
+            <div class="d-flex row">
+                <div class="col-md-6">
+                    <form id="myform" class="text-start p-4">
+                      <div class="row align-items-center p-2">
+                        <div class="col-auto col-md"><label for="bitcoin-core">Bitcoin Core</label></div>
+                        <div class="col d-flex justify-content-end">
+                          <select id="bitcoin-core" class="w-75 form-select" onchange="toggleDownloadUrl()">
+                            <option value="custom-url">Custom URL</option>
+                            <option value="22.0" selected>22.0</option>
+                            <option value="21.0">21.0</option>
+                            <option value="20.0">20.0</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="row align-items-center p-2" id="rowDownloadUrl" style="display: none;" >
+                        <input type="text" class="form-control" id="downloadUrl" placeholder="Download URL"/>
+                      </div>                      
+                      <div class="row align-items-center p-2">
+                        <div class="col-auto col-md"><label for="mode">Bitcoin Mode</label></div>
+                        <div class="col d-flex justify-content-end">
+                          <select id="mode" class="w-75 form-select">
+                            <option value="regtest">Regtest</option>
+                            <option value="testnet">Testnet</option>
+                            <option value="mainnet">Mainnet</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="row align-items-center p-2">
+                        <div class="col-auto col-md"><label for="username">Docker user</label></div>
+                        <div class="col d-flex justify-content-end">
+                          <input id="username" class="form-control" value="bitcoin" placeholder="username" />
+                        </div>
+                      </div>
+                      <div class="row align-items-center p-2">
+                        <div class="col d-flex justify-content-end">
+                          <button type="button" class="btn btn-primary" onclick="generate()">Generate</button>
+                        </div>
+                      </div>
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <pre class="rounded-4 border border-2 px-4" style="background-color: #EFEFEF; max-height: 600px;">
+                      <h5 style="margin: 0px">Dockerfile</h5>
+                      <p style="margin: 0px">{{ dockerfile }}</p>
+                    </pre>
+                    <pre class="rounded-4 border border-2 px-4" style="background-color: #EFEFEF; max-height: 600px">
+                      <h5 style="margin: 0px">bitcoin.conf</h5>
+                      <p style="margin: 0px">{{ config }}</p>
+                    </pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+
+      function toggleDownloadUrl() {
+        var bitcoinCore = document.getElementById("bitcoin-core").value
+        if (bitcoinCore === "custom-url") {
+          document.getElementById("rowDownloadUrl").style.display = "block";
+        } else {
+          document.getElementById("rowDownloadUrl").style.display = "none";
+        }
+      }
+
+      
+
+      function generate() {
+        var bitcoinCore = document.getElementById("bitcoin-core").value;
+        var downloadUrl = document.getElementById("downloadUrl").value;
+        var mode = document.getElementById("mode").value;
+        var username = document.getElementById("username").value;
+
+        window.location.href = `/generate?core=${bitcoinCore}&mode=${mode}&download_url=${downloadUrl}&user=${username}`
+      }
+
+    </script>
+
+  </body>
+</html>
