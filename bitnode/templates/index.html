@@ -102,13 +102,11 @@
         var prune = document.getElementById("prune").value;
         var username = document.getElementById("username").value;
 
-        if (bitcoinCore === "custom-url") {
-          if (downloadUrl.value === "") {
-            alert("Please enter Download URL");
-            return;
-          } else {
-            downloadUrl = downloadUrl.value;
-          }
+        if (bitcoinCore === "custom-url" && downloadUrl.value === "") {
+          alert("Please enter Download URL");
+          return;
+        } else {
+          downloadUrl = downloadUrl.value;
         }
 
         fetch('/generate', {
