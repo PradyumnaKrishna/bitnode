@@ -35,17 +35,25 @@
                           </select>
                         </div>
                       </div>
-                      <div class="row align-items-center p-2" id="rowDownloadUrl" style="display: none;" >
-                        <input type="text" class="form-control" id="downloadUrl" placeholder="Download URL"/>
+                      <div class="row align-items-center p-2">
+                        <div class="col d-flex justify-content-end">
+                          <input type="text" class="form-control" id="downloadUrl" placeholder="Download URL" data-bs-toggle="tooltip" data-bs-placement="top" title="Please enter Download URL" disabled/>
+                        </div>
                       </div>                      
                       <div class="row align-items-center p-2">
                         <div class="col-auto col-md"><label for="mode">Bitcoin Mode</label></div>
                         <div class="col d-flex justify-content-end">
                           <select id="mode" class="w-75 form-select">
+                            <option value="mainnet">Mainnet</option>
                             <option value="regtest">Regtest</option>
                             <option value="testnet">Testnet</option>
-                            <option value="mainnet">Mainnet</option>
                           </select>
+                        </div>
+                      </div>
+                      <div class="row align-items-center p-2">
+                        <div class="col-auto col-md"><label for="mode">Prune Old Blocks</label></div>
+                        <div class="col d-flex justify-content-end">
+                          <input type="number" class="form-control" id="prune" min="0" value="0" />
                         </div>
                       </div>
                       <div class="row align-items-center p-2">
@@ -64,11 +72,11 @@
                 <div class="col-md-6">
                     <pre class="rounded-4 border border-2 px-4" style="background-color: #EFEFEF; max-height: 600px;">
                       <h5 style="margin: 0px">Dockerfile</h5>
-                      <p style="margin: 0px">{{ dockerfile }}</p>
+                      <p id="dockerfile" style="margin: 0px">Generate Dockerfile</p>
                     </pre>
                     <pre class="rounded-4 border border-2 px-4" style="background-color: #EFEFEF; max-height: 600px">
                       <h5 style="margin: 0px">bitcoin.conf</h5>
-                      <p style="margin: 0px">{{ config }}</p>
+                      <p id="config" style="margin: 0px">Generate bitcoin.conf</p>
                     </pre>
                 </div>
             </div>
@@ -81,21 +89,46 @@
       function toggleDownloadUrl() {
         var bitcoinCore = document.getElementById("bitcoin-core").value
         if (bitcoinCore === "custom-url") {
-          document.getElementById("rowDownloadUrl").style.display = "block";
+          document.getElementById("downloadUrl").attributes.removeNamedItem("disabled");
         } else {
-          document.getElementById("rowDownloadUrl").style.display = "none";
+          document.getElementById("downloadUrl").attributes.setNamedItem(document.createAttribute("disabled"));
         }
       }
 
-      
-
       function generate() {
         var bitcoinCore = document.getElementById("bitcoin-core").value;
-        var downloadUrl = document.getElementById("downloadUrl").value;
+        var downloadUrl = document.getElementById("downloadUrl");
         var mode = document.getElementById("mode").value;
+        var prune = document.getElementById("prune").value;
         var username = document.getElementById("username").value;
 
-        window.location.href = `/generate?core=${bitcoinCore}&mode=${mode}&download_url=${downloadUrl}&user=${username}`
+        if (bitcoinCore === "custom-url") {
+          if (downloadUrl.value === "") {
+            alert("Please enter Download URL");
+            return;
+          } else {
+            downloadUrl = downloadUrl.value;
+          }
+        }
+
+        fetch('/generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            core: bitcoinCore,
+            download_url: downloadUrl,
+            mode: mode,
+            prune: prune,
+            user: username
+          })
+        }).then(function(response) {
+          return response.json();
+        }).then(function(data) {
+          document.getElementById("dockerfile").innerHTML = data.dockerfile;
+          document.getElementById("config").innerHTML = data.config;
+        });
       }
 
     </script>
