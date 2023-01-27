@@ -19,14 +19,17 @@ git and python (3.8+ recommended) are required.
    source .venv/bin/activate.bat  # Windows
    ```
 
-3. Install requirmenets and bitnode tool
+3. Install requirements
    ```bash
    pip install -r requirements-dev.txt
-
-   pip install -e .
    ```
 
-4. Start testing the tool
+4. To run the web app, run the following command inside bitnode folder
    ```bash
-   bitnode
+   cd bitnode
+   uvicorn main:app
+   ```
+   or use aditional options
+   ```bash
+   uvicorn main:app --reload --host 0.0.0.0 --port 5000
    ```
