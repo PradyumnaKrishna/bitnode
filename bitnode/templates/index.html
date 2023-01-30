@@ -21,7 +21,7 @@
                       <div class="row align-items-center p-2">
                         <div class="col-auto col-md"><label for="bitcoin-core">Bitcoin Core</label></div>
                         <div class="col d-flex justify-content-end">
-                          <select id="bitcoin-core" class="w-75 form-select" onchange="toggleDownloadUrl()">
+                          <select id="bitcoinCore" class="w-75 form-select" onchange="toggleDownloadUrl()">
                             <option value="custom-url">Custom URL</option>
                             <option value="22.0" selected>22.0</option>
                             <option value="21.0">21.0</option>
@@ -50,6 +50,12 @@
                         <div class="col-auto col-md"><label for="mode">Prune Old Blocks</label></div>
                         <div class="col d-flex justify-content-end">
                           <input type="number" class="form-control" id="prune" min="0" value="0" />
+                        </div>
+                      </div>
+                      <div class="row align-items-center p-2">
+                        <div class="col-auto col-md"><label class="form-check-label" for="rpcSwitch">Add RPC Options</label></div>
+                        <div class="col d-flex justify-content-end form-check form-switch">
+                          <input id="rpcSwitch" class="form-check-input" type="checkbox" />
                         </div>
                       </div>
                       <div class="row align-items-center p-2">
@@ -119,24 +125,21 @@
       }
 
       function generate(form) {
-        var bitcoinCore = document.getElementById("bitcoin-core").value;
-        var downloadUrl = document.getElementById("downloadUrl").value;
-        var mode = document.getElementById("mode").value;
-        var prune = document.getElementById("prune").value;
-        var username = document.getElementById("username").value;
+        var data = {
+          core: form.bitcoinCore.value,
+          download_url: form.downloadUrl.value,
+          mode: form.mode.value,
+          prune: form.prune.value,
+          rpc: form.rpcSwitch.checked,
+          user: form.username.value,
+        }
 
         fetch('/generate', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            core: bitcoinCore,
-            download_url: downloadUrl,
-            mode: mode,
-            prune: prune,
-            user: username
-          })
+          body: JSON.stringify(data)
         }).then(function(response) {
           return response.json();
         }).then(function(data) {

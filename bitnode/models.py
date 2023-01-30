@@ -19,4 +19,5 @@ class Data(BaseModel):
     mode: Modes = Modes.MAINNET
     download_url: Optional[str] = None
     prune: Optional[int] = None
+    rpc: bool = False
     user: str = "bitcoin"

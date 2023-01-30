@@ -1,7 +1,6 @@
 """Bitnode APIs."""
 
 from string import Template
-from typing import Optional
 
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
@@ -44,6 +43,13 @@ def generate(data: Data):
     if data.prune:
         config.append("# Prune the blockchain to save disk space")
         config.append(f"prune={data.prune}")
+        config.append("")
+
+    if data.rpc:
+        config.append("# [rpc]")
+        config.append("server=1")
+        config.append("#rpcuser=")
+        config.append("#rpcpassword=")
         config.append("")
 
     config = '\n'.join(config)
