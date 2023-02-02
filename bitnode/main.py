@@ -1,13 +1,11 @@
 """Bitnode APIs."""
 
-from string import Template
-
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from models import Data, Modes
-from template import SAMPLE_DOCKERFILE
+from template import generate_dockerfile
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -18,7 +16,7 @@ templates = Jinja2Templates(directory="templates")
 def root(request: Request):
     return templates.TemplateResponse(
         "index.html",
-        {"request": request, "dockerfile": SAMPLE_DOCKERFILE},
+        {"request": request},
     )
 
 
@@ -27,12 +25,10 @@ def generate(data: Data):
     """Generate Dockerfile."""
 
     download_url = data.download_url
+    known_arch = True
     if not download_url:
+        known_arch = False
         download_url = f"https://bitcoincore.org/bin/bitcoin-core-{data.core}/bitcoin-{data.core}-${{TARGETPLATFORM}}.tar.gz"
-
-    dockerfile = Template(SAMPLE_DOCKERFILE).substitute(
-        user=data.user, download_url=download_url,
-    )
 
     config = []
     if data.mode != Modes.MAINNET:
@@ -51,6 +47,13 @@ def generate(data: Data):
         config.append("#rpcuser=")
         config.append("#rpcpassword=")
         config.append("")
+
+    dockerfile = generate_dockerfile(
+        download_url=download_url,
+        user=data.user,
+        known_arch=known_arch,
+        copy_config=bool(config),
+    )
 
     config = '\n'.join(config)
 
